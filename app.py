@@ -135,7 +135,7 @@ else:
 
             # Qui configuriamo l'indirizzo dinamico per lo smartphone del discente
             # Quando distribuisci l'app, sostituisci localhost con il vero URL pubblico o locale
-            base_url = "http://https://test-condiviso-vxadys2qemxuwjgbgpelyn.streamlit.app/:8501"
+            base_url = "http://test-condiviso-vxadys2qemxuwjgbgpelyn.streamlit.app/:8501"
             link_discente = f"{base_url}/?caso={caso_da_presentare.replace(' ', '+')}"
 
             # Generazione dinamica del QR Code
