@@ -38,11 +38,11 @@ if st.session_state.step == 1:
     Benvenuto. Analizza i dettagli del caso e l'immagine sottostante prima di procedere al test di valutazione.
 
     **Dettagli dell'analisi:**
-    * Paziente/Infrastruttura: ID-9942
-    * Criticità rilevata: Anomalie nei parametri standard al minuto 45.
+    * **Paziente/Infrastruttura:** ID-9942
+    * **Criticità rilevata:** Anomalie nei parametri standard al minuto 45.
     """)
 
-    # Caricamento immagine (Se hai un file 'caso.jpg' nel tuo GitHub, verrà mostrato qui)
+    # Caricamento immagine (Corretto con use_column_width)
     try:
         st.image("caso.jpg", caption="Immagine diagnostica / tecnica del caso", use_column_width=True)
     except:
@@ -67,7 +67,7 @@ elif st.session_state.step == 2:
 
     q2 = st.radio(
         "2. Quale protocollo ritieni corretto applicare?",
-        ["Protocollo Alfa (Conservativo)", "Protocollo Beta (Aggressivo)", "Nessuna azione richiesto"]
+        ["Protocollo Alfa (Conservativo)", "Protocollo Beta (Aggressivo)", "Nessuna azione richiesta"]
     )
 
     q3 = st.slider("3. Assegna un punteggio di complessità da 1 a 10:", 1, 10, 5)
@@ -101,6 +101,8 @@ elif st.session_state.step == 3:
         textposition='auto'
     ))
     fig.update_layout(title_text="Livello di Complessità Stimato", yaxis=dict(range=[0, 10]))
+
+    # Corretto l'output del grafico per l'interfaccia web
     st.plotly_chart(fig, use_column_width=True)
 
     # Tabella riassuntiva delle scelte testuali
@@ -116,8 +118,8 @@ elif st.session_state.step == 3:
     st.subheader("📱 QR Code di Conferma")
     st.write("Inquadra questo codice per condividere o salvare i dati grezzi del test:")
 
-    # Stringa dati per il QR (può essere un testo o un URL)
-    dati_qr = f"TEST_OK | Urgenza: {st.session_state.risposte['Urgenza']} | Protocollo: {st.session_state.risposte['Protocollo']} | Score: {st.session_state.risposte['Complessità']}/10"
+    # Stringa dati per il QR
+    dati_qr = f"ID: ID-9942 | Urgenza: {st.session_state.risposte['Urgenza']} | Protocollo: {st.session_state.risposte['Protocollo']} | Score: {st.session_state.risposte['Complessità']}/10"
 
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(dati_qr)
