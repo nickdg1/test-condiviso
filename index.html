@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Caso Studio Interattivo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.59.0/build/stlite.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.59.0/build/stlite.js"></script>
+    <script>
+      stlite.mount(
+        {
+          requirements: ["plotly", "qrcode", "pillow"], // Librerie Python richieste
+          entrypoint: "app.py",
+          files: {
+            "app.py": `
+import streamlit as st
+import qrcode
+import plotly.graph_objects as go
+from PIL import Image
+import io
+
+st.set_page_config(page_title="Caso Studio & Quiz", page_icon="📊", layout="centered")
+
+# Inizializzazione dello stato della sessione per navigare tra i passaggi
+if 'step' not in st.session_state:
+    st.session_state.step = 1
+if 'risposte' not in st.session_state:
+    st.session_state.risposte = {}
+
+# --- STEP 1: PRESENTAZIONE DEL CASO ---
+if st.session_state.step == 1:
+    st.title("📋 Presentazione del Caso Clinico / Tecnico")
+    st.markdown("""
+    Benvenuto. Analizza i dettagli del caso e l'immagine sottostante prima di procedere al test di valutazione.
+
+    **Dettagli dell'analisi:**
+    * Paziente/Infrastruttura: ID-9942
+    * Criticità rilevata: Anomalie nei parametri standard al minuto 45.
+    """)
+
+    # Caricamento immagine (Se hai un file 'caso.jpg' nel tuo GitHub, verrà mostrato qui)
+    try:
+        st.image("caso.jpg", caption="Immagine diagnostica / tecnica del caso", use_container_width=True)
+    except:
+        # Se l'immagine non c'è ancora, creiamo un rimpiazzo colorato
+        img = Image.new('RGB', (800, 400), color = (41, 128, 185))
+        st.image(img, caption="[Inserisci il tuo file 'caso.jpg' su GitHub per sostituire questo box]", use_container_width=True)
+
+    st.write("---")
+    if st.button("Procedi al Test Valutativo ➡️"):
+        st.session_state.step = 2
+        st.rerun()
+
+# --- STEP 2: IL QUIZ CON DOMANDE ---
+elif st.session_state.step == 2:
+    st.title("✍️ Test di Valutazione")
+    st.write("Rispondi alle domande basandoti sugli elementi del caso.")
+
+    q1 = st.selectbox(
+        "1. Qual è la tua valutazione sul livello di urgenza?",
+        ["Basso", "Moderato", "Critico / Immediato"]
+    )
+
+    q2 = st.radio(
+        "2. Quale protocollo ritieni corretto applicare?",
+        ["Protocollo Alfa (Conservativo)", "Protocollo Beta (Aggressivo)", "Nessuna azione richiesto"]
+    )
+
+    q3 = st.slider("3. Assegna un punteggio di complessità da 1 a 10:", 1, 10, 5)
+
+    st.write("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("⬅️ Torna al Caso"):
+            st.session_state.step = 1
+            st.rerun()
+    with col2:
+        if st.button("Elabora Risultati e Grafici 🚀"):
+            st.session_state.risposte = {"Urgenza": q1, "Protocollo": q2, "Complessità": q3}
+            st.session_state.step = 3
+            st.rerun()
+
+# --- STEP 3: GRAFICI E QR CODE ---
+elif st.session_state.step == 3:
+    st.title("📊 Analisi e Ricevuta Digitale")
+    st.success("Risposte registrate localmente nel browser!")
+
+    # 1. MOSTRA I GRAFICI DELLE RISPOSTE (Utilizzando Plotly)
+    st.subheader("📈 Visualizzazione delle tue metriche")
+
+    # Grafico a barre per la Complessità
+    fig = go.Figure(go.Bar(
+        x=['La tua valutazione'],
+        y=[st.session_state.risposte["Complessità"]],
+        marker_color='#2ecc71',
+        text=[f'{st.session_state.risposte["Complessità"]}/10'],
+        textposition='auto'
+    ))
+    fig.update_layout(title_text="Livello di Complessità Stimato", yaxis=dict(range=[0, 10]))
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Tabella riassuntiva delle scelte testuali
+    st.write("**Riepilogo Scelte:**")
+    st.table({
+        "Parametro": ["Urgenza Selezionata", "Protocollo Scelto"],
+        "Tua Risposta": [st.session_state.risposte["Urgenza"], st.session_state.risposte["Protocollo"]]
+    })
+
+    st.write("---")
+
+    # 2. GENERAZIONE QR CODE
+    st.subheader("📱 QR Code di Conferma")
+    st.write("Inquadra questo codice per condividere o salvare i dati grezzi del test:")
+
+    # Stringa dati per il QR (può essere un testo o un URL)
+    dati_qr = f"TEST_OK | Urgenza: {st.session_state.risposte['Urgenza']} | Protocollo: {st.session_state.risposte['Protocollo']} | Score: {st.session_state.risposte['Complessità']}/10"
+
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
+    qr.add_data(dati_qr)
+    qr.make(fit=True)
+    img_qr = qr.make_image(fill_color="black", back_color="white")
+
+    buf = io.BytesIO()
+    img_qr.save(buf, format="PNG")
+    byte_im = buf.getvalue()
+
+    col_qr, col_txt = st.columns([1, 2])
+    with col_qr:
+        st.image(byte_im, width=200)
+    with col_txt:
+        st.info("Questo QR Code è generato interamente in locale dal tuo browser via WebAssembly.")
+        st.download_button(label="💾 Scarica QR Code", data=byte_im, file_name="ricevuta_test.png", mime="image/png")
+
+    if st.button("🔄 Ricomincia"):
+        st.session_state.step = 1
+        st.session_state.risposte = {}
+        st.rerun()
+            `
+          }
+        },
+        document.getElementById("root")
+      );
+    </script>
+  </body>
+</html>
