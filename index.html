@@ -44,11 +44,11 @@ if st.session_state.step == 1:
 
     # Caricamento immagine (Se hai un file 'caso.jpg' nel tuo GitHub, verrà mostrato qui)
     try:
-        st.image("caso.jpg", caption="Immagine diagnostica / tecnica del caso", use_container_width=True)
+        st.image("caso.jpg", caption="Immagine diagnostica / tecnica del caso", use_column_width=True)
     except:
         # Se l'immagine non c'è ancora, creiamo un rimpiazzo colorato
         img = Image.new('RGB', (800, 400), color = (41, 128, 185))
-        st.image(img, caption="[Inserisci il tuo file 'caso.jpg' su GitHub per sostituire questo box]", use_container_width=True)
+        st.image(img, caption="[Inserisci il tuo file 'caso.jpg' su GitHub per sostituire questo box]", use_column_width=True)
 
     st.write("---")
     if st.button("Procedi al Test Valutativo ➡️"):
@@ -101,7 +101,7 @@ elif st.session_state.step == 3:
         textposition='auto'
     ))
     fig.update_layout(title_text="Livello di Complessità Stimato", yaxis=dict(range=[0, 10]))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_column_width=True)
 
     # Tabella riassuntiva delle scelte testuali
     st.write("**Riepilogo Scelte:**")
